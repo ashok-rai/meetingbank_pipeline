@@ -1,1 +1,39 @@
 .DS_Store
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+
+# Airflow
+logs/
+airflow.db
+airflow.cfg
+airflow-webserver.pid
+
+# Data files (too large)
+data/raw/
+data/cleaned/
+data/processed/
+data/results/
+*.csv
+*.json
+!data/sample/sample_meetings.json
+
+# Environment
+.env
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
