@@ -24,7 +24,7 @@ class Config:
     
     # Database configurations
     POSTGRES_CONFIG = {
-        'host': os.getenv('POSTGRES_HOST', 'localhost'),
+        'host': os.getenv('POSTGRES_HOST', 'postgres'),
         'port': int(os.getenv('POSTGRES_PORT', 5432)),
         'user': os.getenv('POSTGRES_USER', 'airflow'),
         'password': os.getenv('POSTGRES_PASSWORD', 'airflow'),
@@ -32,7 +32,7 @@ class Config:
     }
     
     MONGODB_CONFIG = {
-        'host': os.getenv('MONGODB_HOST', 'localhost'),
+        'host': os.getenv('MONGODB_HOST', 'mongodb'),
         'port': int(os.getenv('MONGODB_PORT', 27017)),
         'user': os.getenv('MONGODB_USER', 'admin'),
         'password': os.getenv('MONGODB_PASSWORD', 'admin123'),
@@ -44,11 +44,8 @@ class Config:
     HUGGINGFACE_TOKEN = os.getenv('HUGGINGFACE_TOKEN', None)
     
     # Pipeline settings
-    SUBSET_SIZE = 50  # Number of meetings to process
-    TARGET_CITIES = [
-        "Seattle", "Boston", "Denver", 
-        "King County", "Long Beach", "Alameda"
-    ]
+    SUBSET_SIZE = 100  # Number of meetings to process
+    TARGET_CITIES = ['Seattle', 'King County', 'Denver', 'Boston', 'Alameda', 'Long Beach']
     
     # Retry settings
     API_RETRY_COUNT = 3
