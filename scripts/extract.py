@@ -4,6 +4,7 @@ Fetches meeting data from HuggingFace API
 """
 
 import json
+from scripts.config import Config 
 import logging
 import time
 from datetime import datetime
@@ -12,7 +13,7 @@ from typing import List, Dict, Optional
 import requests
 from datasets import load_dataset
 
-from config import Config
+#from config import Config
 
 # Configure logging
 logging.basicConfig(
@@ -26,8 +27,9 @@ class MeetingBankExtractor:
     """Extracts meeting data from HuggingFace API"""
     
     def __init__(self):
+        #self.config = Config()
+        #self.config.create_directories()
         self.config = Config()
-        self.config.create_directories()
         
     def fetch_dataset_from_huggingface(self, subset_size: int = None) -> List[Dict]:
         """
@@ -48,21 +50,51 @@ class MeetingBankExtractor:
             # Load dataset
             dataset = load_dataset(
                 self.config.HUGGINGFACE_DATASET,
-                split=f"train[:{subset_size}]",
+                split=f"train",
                 token=self.config.HUGGINGFACE_TOKEN
             )
             
+            
+
             # Convert to list of dictionaries
             meetings = []
             for item in dataset:
+                # Extract City and Date from 'uid' which contains the necessary info
+                uid = item.get('uid', '')
+                uid_parts = uid.split('_')
+                
+                # --- City Extraction ---
+                # Take the first part, and clean it up (e.g., 'DenverCityCouncil' -> 'Denver')
+                raw_city_part = uid_parts[0] if uid_parts else ''
+                # Remove "CityCouncil" if present to match TARGET_CITIES
+                city = raw_city_part.replace('CityCouncil', '')
+                
+                # --- Date Extraction ---
+                date_str = ''
+                # Check for the date part (second part, e.g., '05012017')
+                if len(uid_parts) > 1 and len(uid_parts[1]) >= 8 and uid_parts[1].isdigit():
+                    mmddyyyy = uid_parts[1][:8] # Take first 8 digits
+                    # Convert MMDDYYYY to YYYY-MM-DD (Expected format)
+                    year = mmddyyyy[4:]
+                    month = mmddyyyy[:2]
+                    day = mmddyyyy[2:4]
+                    date_str = f"{year}-{month}-{day}"
+ 
                 meeting = {
-                    'meeting_id': item.get('id', ''),
-                    'city': item.get('city', ''),
-                    'date': item.get('date', ''),
-                    'title': item.get('title', ''),
+                    # ID is correctly mapped
+                    'meeting_id': str(item.get('id', '')),
+                    # Use extracted city
+                    'city': city,
+                    # Use extracted date in YYYY-MM-DD format
+                    'date': date_str,
+                    # Title field is missing in raw data, using 'summary' as a descriptive fallback
+                    'title': item.get('summary', ''), 
+                    # Transcript is correctly mapped
                     'transcript': item.get('transcript', ''),
-                    'summary': item.get('summary', ''),
-                    'agenda': item.get('agenda', []),
+                    # Summary is correctly mapped
+                    'summary': item.get('summary', ''), 
+                    # Other fields will be empty/default if not present in raw data
+                    'agenda': item.get('agenda', []), 
                     'metadata': {
                         'url': item.get('url', ''),
                         'video_url': item.get('video_url', ''),
@@ -180,9 +212,10 @@ class MeetingBankExtractor:
                 lambda: self.fetch_dataset_from_huggingface(subset_size)
             )
             
-            # Step 2: Filter by cities
+            # Step 2: Filter by cities 
             filtered_meetings = self.filter_by_cities(meetings)
-            
+            #filtered_meetings = meetings
+
             # Step 3: Save raw data
             output_path = self.save_raw_data(filtered_meetings)
             
