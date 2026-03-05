@@ -42,5 +42,3 @@ See `docs/` for detailed documentation:
 - Transformation: `docs/README_TRANSFORM.md`
 - Database Loading: `docs/README_LOAD.md`
 - Airflow Setup: `docs/README_AIRFLOW.md`
-
-## Project Structure
